@@ -1,0 +1,125 @@
+---
+title: "Final Group Project"
+members: "Jeni Luong (Communications and Project Manager), Christine Lee (Data Engineer), Christopher Xu (Developer), Breanna Bernardino (Developer and Graphic Designer)"
+Roles: We all contributed to each role although we slightly shifted roles from what we listed originally at the start of the project.
+course: "INST 462"
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(dplyr)
+
+crime <- read_csv("Crime_by_County_1975_to_Present.csv")
+education <- read_csv("Compare_Counties_Education.csv")
+```
+
+```{r}
+# filter crime data
+crimeFiltered <- crime %>%
+  filter(YEAR %in% c(2014, 2018)) %>%
+  select(JURISDICTION, YEAR, `VIOLENT CRIME PERCENT`)
+
+# view the filtered data
+print(crimeFiltered)
+```
+
+```{r}
+# change colnames
+colnames(crimeFiltered) <- c("County", "Year", "Crime")
+colnames(crimeFiltered)
+
+# view the updated column names
+print(crimeFiltered)
+```
+
+```{r}
+# bar graph for 2014
+filteredData <- crimeFiltered %>%
+  filter(Year == 2014)
+
+# create bar graph for 2014
+ggplot(filteredData, aes(x = County, y = Crime)) +
+  geom_bar(stat = "identity", width = .5, fill = "skyblue") +
+  labs(
+    title = "Violent Crime Percentage by County (2014)",
+    x = "County",
+    y = "Violent Crime Percentage"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+# bar graph for 2018
+filteredData <- crimeFiltered %>%
+  filter(Year == 2018)
+
+# create bar graph for 2018
+ggplot(filteredData, aes(x = County, y = Crime)) +
+  geom_bar(stat = "identity", width = .5, fill = "skyblue") +
+  labs(
+    title = "Violent Crime Percentage by County (2018)",
+    x = "County",
+    y = "Violent Crime Percentage"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+# filter education
+educationFilter <- select(education, `Bachelor's Degree Attainment (%)`, `High School Attainment (%)`)
+print(educationFilter)
+```
+
+```{r}
+# filter education data
+educationFilter <- select(education, County, `Bachelor's Degree Attainment (%)`, `High School Attainment (%)`)
+print(educationFilter)
+```
+
+```{r}
+# combines data
+combinedData <- crimeFiltered %>%
+  left_join(educationFilter, by = c("County"))
+print(combinedData)
+```
+
+```{r}
+#filtering combinedData to just include years 2014 & 2018
+just2014_2018 <- combinedData %>%
+  filter(Year %in% c(2014, 2018))
+```
+
+```{r}
+#scatterplot for bachelor’s degree for years 2014 & 2018 with lines of best fit for each year
+ggplot(just2014_2018, aes(x = `Bachelor's Degree Attainment (%)`, y = `Crime`, color = factor(Year))) +
+  geom_point() + geom_smooth(method = "lm", aes(group = Year), se = FALSE) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+```
+
+```{r}
+#scatterplot for high school degree for years 2014 & 2018 with lines of best fit for each year                         
+ggplot(just2014_2018, aes(x = `High School Attainment (%)`, y = `Crime`, color = factor(Year))) +
+  geom_point() + geom_smooth(method = "lm", aes(group = Year), se = FALSE) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+```
+
+#Documentation
+
+We obtained our dataset from data.gov, which contains open data from the US government. Our first dataset includes information on education attainment levels across counties in Maryland. https://catalog.data.gov/dataset/choose-maryland-compare-counties-education. 
+
+Our second dataset includes information on violent and property crimes by county in Maryland. https://catalog.data.gov/dataset/violent-crime-property-crime-by-county-1975-to-present. We used the crime rates to explore the relationship between crime and educational attainment in different counties.
+
+Our visualizations aim to communicate the relationship between education attainment levels and crime rates across Maryland counties. Specifically, we aim to explore whether increased high school graduation rates and higher percentages of individuals with bachelor’s degrees—may be linked to lower crime rates, especially for violent and property crimes. We focus on comparing data from two years, 2014 and 2018, to explore if there is a noticeable trend over time.
+
+In order to best interpret the scatter plot we have a line of best fit that shows the general trend, suggesting that as education levels increase, crime rates decrease. We also included a color key in our scatterplot that helps us visually compare the data from both 2014 and 2018. We had red represent data from 2014 and blue represent the data from 2018. 
+
+A challenge that we faced was merging our two datasets into one singular dataset. We ended up using a left join, and merged the data based on the counties. 
+
+Additionally, we would like to note that we had to manually make changes to our dataset by editing the footnotes and sources at the bottom of our original dataset as it would be difficult to remove by filtering in R however, most of our filtering of our dataset was done in R. (Please note: We did end up renaming our edited dataset that was used in our final code which is different than the original that was downloaded from data.gov)
+
+Overall, we found that out of all the counties in Maryland, Baltimore City had the highest crime rate and that with higher education attainment rates, less crime is to be committed. We can conclude that if cities, such as Baltimore city invest more in education, they are likely to see a drop in crime rates over time.
+
